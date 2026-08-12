@@ -1,8 +1,22 @@
+<div align="center">
+  <img src="./web/public/logo.jpg" alt="SIFRA Logo" width="150" />
+</div>
+
 # SIFRA — Agent Orchestration & Multi-Agent Runtime
 
 > A powerful multi-agent UI and orchestration harness for building durable LLM systems.
 
 SIFRA is a robust application designed to provide the infrastructure layer around an LLM — the **harness**. It moves past basic API wrappers to offer a durable, isolated, memory-aware, and coordinated environment for running complex agent systems.
+
+## Architecture
+
+```mermaid
+graph TD
+    User([User]) -->|Interacts| UI[Frontend UI<br/>React + Vite]
+    UI <-->|WebSocket<br/>Events & Commands| Server[Backend Server<br/>Express + Node.js]
+    Server <-->|API Calls| LLM[LLM Engine<br/>OpenAI / Vercel AI SDK]
+    Server <-->|State Checkpoints| DB[(Postgres DB<br/>Durable Execution)]
+```
 
 ## Features
 
@@ -39,6 +53,17 @@ npm run dev    # Starts the harness server (:8787) and UI (:5173) concurrently
 ```
 
 `npm run dev` boots the **SIFRA Workspace** — a chat pane on the left and a live event-stream pane on the right. You can interact with the agent, track its thinking process via custom animations, and view the execution stream alongside your conversation.
+
+## Usage Guide
+
+Once SIFRA is running locally, open `http://localhost:5173` in your browser.
+
+- **Starting a Chat**: Type an objective in the input bar and press the send icon (or `Enter`). SIFRA will automatically rename the chat tab in the sidebar based on your first prompt.
+- **Managing Workspaces**: Use the SIFRA logo in the top-left to expand or collapse the sidebar. The sidebar tracks your recent chats, allowing you to seamlessly switch context.
+- **Renaming Chats**: Double-click any chat name in the expanded sidebar, or click the pencil icon on hover, to manually rename a session.
+- **Monitoring Execution**: The dual-pane system shows your conversation on the left and the raw event stream on the right. Watch the harness emit internal events in real-time.
+- **Theme Toggle**: Use the moon/sun icon in the top-right header to switch between light and dark modes.
+- **Clear Memory**: Click the eraser icon next to the send button to quickly clear the current agent's context and restart the session.
 
 ## Prerequisites
 
