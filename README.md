@@ -1,86 +1,44 @@
 # SIFRA — Agent Orchestration & Multi-Agent Runtime
 
-> Stop building scripts. Start building durable multi-agent systems.
+> A powerful multi-agent UI and orchestration harness for building durable LLM systems.
 
-A one-day, hands-on workshop on the infrastructure layer around an LLM — the **harness** — that
-makes agents survive production. Move past basic while-loops and API wrappers and learn the
-patterns that keep agents durable, isolated, memory-aware, and coordinated.
+SIFRA is a robust application designed to provide the infrastructure layer around an LLM — the **harness**. It moves past basic API wrappers to offer a durable, isolated, memory-aware, and coordinated environment for running complex agent systems.
 
-Instead of one large cumulative project, each lesson tackles a **new architectural pattern**: you
-see it introduced, watch it live-coded in TypeScript/Node.js, and move on.
+## Features
 
-## What you'll learn
-
-1. **The Agent Harness** — the middleware that gives an LLM its context, tools, and guardrails.
-2. **Durable Execution** — checkpoint agent steps so a crash or rate limit resumes exactly where it left off.
-3. **Secure Sandboxing** — run untrusted, agent-generated code in an isolated runtime with timeouts.
-4. **Advanced Memory** — hydrate the right context with state stores, sliding windows, and summarization.
-5. **Orchestration** — route intent and hand off context between a triage agent and specialists.
-6. **Hierarchical Supervision** — a supervisor that plans, spawns parallel sub-agents, and merges results.
-7. **Human-in-the-Loop** — durable suspend/resume to wait minutes or days for human approval.
-
-## How the course is organized
-
-Each lesson is its own git branch:
-
-```
-lesson-1 → lesson-2 → ... → lesson-7 (latest)
-```
-
-Each lesson branch contains:
-
-- The solution for the **previous** lesson (so you can catch up if you fall behind).
-- The notes for the **current** lesson under `lessons/<lesson-name>/index.md`.
-
-Two convenience branches:
-
-- **`main`** — points at the latest lesson. This is what you see on the GitHub landing page.
-- **`complete`** — same as `main`, an explicit name for "everything that exists right now."
-
-So if you fall behind in lesson 4, `git checkout lesson-5` to grab the lesson 4 solution and pick
-up from there.
-
-### Reading the lesson notes
-
-Notes live alongside the code under `lessons/`. You can read them three ways:
-
-- **On GitHub or in your editor** — they're plain markdown.
-- **In Obsidian** — open the `lessons/` directory as a vault.
-- **As a local site** — run `npm run docs` to serve them with VitePress at http://localhost:5173.
+- **Advanced UI/UX:** A highly responsive, glassmorphism-inspired interface built with React and Tailwind CSS.
+- **Dynamic Workspaces:** Features a collapsible sidebar, auto-renaming chats based on context, and real-time agent event streaming.
+- **The Agent Harness:** Middleware that equips an LLM with context, tools, and necessary guardrails.
+- **Durable Execution:** Checkpoint agent steps so that crashes or rate limits can resume exactly where they left off.
+- **Secure Sandboxing:** Run untrusted, agent-generated code in an isolated runtime with proper timeouts.
+- **Advanced Memory:** Hydrate the right context using state stores, sliding windows, and summarization.
 
 ## Setup
 
-### 1. Clone and install
+### 1. Clone and Install
 
 ```bash
 git clone <this repo url>
-cd harness-engineering
+cd SIFRA
 npm install
 ```
 
-### 2. Configure environment variables
+### 2. Configure Environment Variables
 
-Copy `.dev.vars.example` to `.dev.vars` and fill in your keys. An OpenAI API key is required from
-Lesson 1; **Lesson 2 (durable execution) adds a Postgres database** — grab a free instant one from
-[neon.new](https://neon.new) and use its **direct** connection string (not the `-pooler` host).
+Copy `.dev.vars.example` to `.dev.vars` and fill in your keys. An OpenAI API key is required, along with a Postgres database for durable execution. (You can grab a free instant Postgres database from [neon.new](https://neon.new) and use its **direct** connection string).
 
-```
+```text
 OPENAI_API_KEY=sk-...
-DATABASE_URL=postgresql://user:password@host/db?sslmode=require   # Lesson 2+
+DATABASE_URL=postgresql://user:password@host/db?sslmode=require
 ```
 
-### 3. Run things
+### 3. Run the Application
 
 ```bash
-npm run dev    # start the app: harness server (:8787) + inspector UI (:5173)
-npm run docs   # serve the lesson notes with VitePress
-npm run typecheck
+npm run dev    # Starts the harness server (:8787) and UI (:5173) concurrently
 ```
 
-`npm run dev` boots the **Harness Inspector** — a chat pane on the left and a live
-event-stream pane on the right. Out of the box the agent is a stub: submit a task and
-you'll see the harness emit `workflow.started` → a "no agent yet" log → `workflow.completed`.
-You build the real (brittle) agent loop in Lesson 1.
+`npm run dev` boots the **SIFRA Workspace** — a chat pane on the left and a live event-stream pane on the right. You can interact with the agent, track its thinking process via custom animations, and view the execution stream alongside your conversation.
 
 ## Prerequisites
 
@@ -88,13 +46,12 @@ You build the real (brittle) agent loop in Lesson 1.
 - Basic understanding of LLM APIs and standard agent loops (receive → think → act → respond).
 - Familiarity with asynchronous programming and API integrations.
 
-## Tech stack
+## Tech Stack
 
 - **Runtime:** Node.js + TypeScript, run with `tsx` (no build step for the server).
 - **Server:** Express + `ws` — hosts the harness and streams its event log to the browser over one WebSocket.
-- **LLM:** OpenAI (GPT-5.5) via the Vercel AI SDK (server-side only; the harness owns the transport).
-- **UI:** Vite + React, styled with prompt-kit (shadcn/ui + Tailwind). The inspector renders the harness event stream; **students don't build the UI.**
-- **Notes:** VitePress.
-- Libraries for durable execution, sandboxing, and state are introduced per lesson.
+- **Database:** Postgres via Drizzle ORM.
+- **LLM:** OpenAI via the Vercel AI SDK.
+- **UI:** Vite + React, styled with Tailwind CSS, Lucide Icons, and shadcn/ui components. Features custom micro-animations and a bespoke `ThinkingDots` indicator.
 
-Everything runs locally. No deployment needed.
+Everything runs locally for rapid development and testing.
