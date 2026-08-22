@@ -20,12 +20,12 @@ graph TD
 
 ## Features
 
-- **Advanced UI/UX:** A highly responsive, glassmorphism-inspired interface built with React and Tailwind CSS.
-- **Dynamic Workspaces:** Features a collapsible sidebar, auto-renaming chats based on context, and real-time agent event streaming.
-- **The Agent Harness:** Middleware that equips an LLM with context, tools, and necessary guardrails.
-- **Durable Execution:** Checkpoint agent steps so that crashes or rate limits can resume exactly where they left off.
-- **Secure Sandboxing:** Run untrusted, agent-generated code in an isolated runtime with proper timeouts.
-- **Advanced Memory:** Hydrate the right context using state stores, sliding windows, and summarization.
+- **The Agent Harness:** Acts as intelligent middleware that equips the LLM with context, custom tools, and strict guardrails to keep execution on track.
+- **Durable Execution:** Automatically saves state checkpoints to a Postgres database, allowing agents to resume exactly where they left off in the event of crashes or API rate limits.
+- **Real-Time Dual-Pane UI:** A modern, highly responsive React/Tailwind interface featuring a chat pane for interaction and a live WebSocket-powered event-stream pane for complete observability into the AI's "thought" process.
+- **Advanced Memory Hydration:** Intelligently manages context limits using state stores, sliding windows, and automatic summarization to keep the LLM focused and reduce API costs.
+- **Secure Code Sandboxing:** Runs untrusted, AI-generated code in a strictly isolated runtime with resource constraints and timeouts to prevent system vulnerabilities.
+- **Dynamic Workspaces:** Features a collapsible sidebar, context-aware auto-renaming for chat sessions, and custom micro-animations for a premium user experience.
 
 ## Setup
 
