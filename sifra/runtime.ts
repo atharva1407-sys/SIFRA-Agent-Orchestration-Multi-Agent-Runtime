@@ -145,6 +145,16 @@ async function agentWorkflow(input: string): Promise<string> {
 
       const turnMessages: ModelMessage[] = [...turn.responseMessages];
 
+      // Streamed text deltas are live-only (not stored). If the model wrote text
+      // BEFORE calling tools, persist it here so a reload still shows it. (When
+      // there are no tool calls, ModelCompleted is emitted below instead.)
+      if (turn.text && turn.toolCalls.length > 0) {
+        await DBOS.runStep(
+          () => emit({ type: EventType.ModelCompleted, workflowId, text: turn.text }),
+          { name: `model-text-${step}` },
+        );
+      }
+
       if (turn.toolCalls.length === 0) {
         await DBOS.runStep(
           () => emit({ type: EventType.ModelCompleted, workflowId, text: turn.text }),

@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { db, eventLog } from "./db";
+import { EventType } from "@shared/events";
 import type { AgentEvent, EventInput } from "@shared/events";
 
 // The harness event bus. Two jobs now:
@@ -18,6 +19,15 @@ export function subscribe(listener: Listener): () => void {
 
 export async function emit(input: EventInput): Promise<void> {
   const event: AgentEvent = { ...input, id: randomUUID(), ts: Date.now() };
+
+  // Streamed text chunks are live-only. Writing each one to a remote Postgres
+  // made streaming slow (one awaited round trip per chunk). The full text is
+  // persisted once, in the ModelCompleted event, so nothing is lost on replay.
+  if (input.type === EventType.ModelDelta) {
+    for (const listener of listeners) listener(event);
+    return;
+  }
+
   await db.insert(eventLog).values({ data: event }); // durable, ordered by `seq`
   for (const listener of listeners) listener(event); // live
 }

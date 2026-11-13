@@ -83,25 +83,40 @@ async function main() {
         return;
       }
 
-      if (message.type === "submit_task") {
-        // Pick the runtime: the single-agent loop, or the supervisor.
-        const workflow =
-          message.mode === "supervised" ? runSupervisorWorkflow : runAgentWorkflow;
-        await DBOS.startWorkflow(workflow)(message.input);
-      } else if (message.type === "stop_generation") {
-        stopWorkflow(message.workflowId);
-        if (message.workflowId) {
-          await DBOS.cancelWorkflow(message.workflowId).catch(() => {});
-        } else {
-          for (const wId of activeWorkflows.keys()) {
-            await DBOS.cancelWorkflow(wId).catch(() => {});
+      // An async handler that throws is an unhandled rejection, which kills the
+      // Node process. Catch here so one bad message can't take the server down.
+      try {
+        if (message.type === "submit_task") {
+          // Pick the runtime: the single-agent loop, or the supervisor.
+          const workflow =
+            message.mode === "supervised" ? runSupervisorWorkflow : runAgentWorkflow;
+          await DBOS.startWorkflow(workflow)(message.input);
+        } else if (message.type === "stop_generation") {
+          stopWorkflow(message.workflowId);
+          if (message.workflowId) {
+            await DBOS.cancelWorkflow(message.workflowId).catch(() => {});
+          } else {
+            for (const wId of activeWorkflows.keys()) {
+              await DBOS.cancelWorkflow(wId).catch(() => {});
+            }
           }
         }
+      } catch (error) {
+        console.error("failed to handle message:", error);
       }
     });
 
     // Replay the durable timeline (including a workflow DBOS is recovering).
-    for (const event of await history()) socket.send(JSON.stringify(event));
+    // Same reason as above: a database error or a socket that closed mid-replay
+    // must not crash the server.
+    try {
+      for (const event of await history()) {
+        if (socket.readyState !== socket.OPEN) break;
+        socket.send(JSON.stringify(event));
+      }
+    } catch (error) {
+      console.error("failed to replay history:", error);
+    }
   });
 
   server.listen(PORT, () => {

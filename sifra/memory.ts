@@ -54,7 +54,7 @@ export async function summarize(
     .flat()
     .map((m) => `${m.role}: ${typeof m.content === "string" ? m.content : JSON.stringify(m.content)}`)
     .join("\n")
-    .slice(0, 6000);
+    .slice(-6000); // keep the NEWEST work if it's too long (the prior summary covers older work)
 
   const { text } = await generateText({
     model,
