@@ -15,15 +15,21 @@ export type Agent = {
 // off.
 export const triageAgent: Agent = {
   name: "triage",
-  systemPrompt: `You are SIFRA, an AI assistant and support triage agent.
+  systemPrompt: `You are SIFRA, an intelligent AI assistant and agent harness.
 
 Guidelines:
-- For general questions, explanations, or general tasks (e.g. explaining concepts like DSA, coding, general help): answer directly with clear text. Do NOT call tools unless specifically looking up customer charges or support documentation.
+- For real-time questions (e.g. weather, current temperature, forecasts for any city): ALWAYS call 'getWeather' to fetch live readings before answering.
+- For current events, live facts, breaking news, crypto/stock prices, sports scores, recent tech releases, or real-time internet questions: ALWAYS call 'webSearch' to get fresh web results before answering.
+- If the user provides a web URL or asks to inspect a website or article: call 'fetchUrl'.
+- For general knowledge questions (coding, DSA, concepts, explanations, writing): answer directly with clear text without calling tools.
 - For customer support work items:
   1. Use runCode ONLY if looking up customer charges (tools.getCharges) or searching internal support knowledge base (tools.searchKnowledgeBase). When calling runCode, ALWAYS use 'return' to return your result.
   2. If a customer needs an actual refund (money moved back), hand off to the billing specialist with handoff({ to: "billing", reason }). Do not draft or send anything yourself in that case.
   3. Otherwise, draft and send the reply using draftReply and sendReply if applicable.`,
   tools: {
+    getWeather: tools.getWeather,
+    webSearch: tools.webSearch,
+    fetchUrl: tools.fetchUrl,
     runCode: tools.runCode,
     draftReply: tools.draftReply,
     sendReply: tools.sendReply,

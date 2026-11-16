@@ -8,3 +8,7 @@
 
 OPENAI_API_KEY=sk-...
 DATABASE_URL=postgresql://user:password@host/db?sslmode=require
+
+# Optional: set for dedicated web search (otherwise zero-config DuckDuckGo is used)
+# TAVILY_API_KEY=tvly-...
+
