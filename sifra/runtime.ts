@@ -35,6 +35,9 @@ async function modelTurn(
 
   for await (const part of result.fullStream) {
     if (signal?.aborted) break;
+    // Surface the provider's real error (bad request, auth, rate limit...) instead
+    // of the generic "No output generated" the SDK throws later.
+    if (part.type === "error") throw part.error;
     if (part.type === "text-delta") {
       await emit({ type: EventType.ModelDelta, workflowId, text: part.text });
     }

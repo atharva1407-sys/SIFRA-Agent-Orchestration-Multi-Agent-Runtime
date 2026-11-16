@@ -5,7 +5,6 @@ import {
   ChatContainerRoot,
 } from "@/components/ui/chat-container";
 import { Markdown } from "@/components/ui/markdown";
-import { Tool, type ToolPart } from "@/components/ui/tool";
 import {
   ChainOfThought,
   ChainOfThoughtContent,
@@ -50,7 +49,6 @@ type Subagent = {
 type Turn =
   | { id: string; role: "user"; text: string }
   | { id: string; role: "assistant"; text: string }
-  | { id: string; role: "tool"; part: ToolPart }
   | { id: string; role: "handoff"; from: string; to: string; reason: string }
   | { id: string; role: "supervision"; subagents: Subagent[] }
   | {
@@ -67,7 +65,6 @@ function toTranscript(events: AgentEvent[]): { turns: Turn[]; running: boolean; 
   const turns: Turn[] = [];
   let assistant: Extract<Turn, { role: "assistant" }> | null = null;
   let supervision: Extract<Turn, { role: "supervision" }> | null = null;
-  const toolsById = new Map<string, Extract<Turn, { role: "tool" }>>();
   const approvalsById = new Map<string, Extract<Turn, { role: "approval" }>>();
   let open = 0;
   let activeWorkflowId: string | null = null;
@@ -100,38 +97,11 @@ function toTranscript(events: AgentEvent[]): { turns: Turn[]; running: boolean; 
         else turns.push({ id: ev.id, role: "assistant", text: ev.text });
         assistant = null;
         break;
-      case EventType.ToolRequested: {
-        const turn: Extract<Turn, { role: "tool" }> = {
-          id: ev.id,
-          role: "tool",
-          part: {
-            type: ev.name,
-            state: "input-available",
-            input: ev.args as Record<string, unknown>,
-            toolCallId: ev.toolCallId,
-          },
-        };
-        toolsById.set(ev.toolCallId, turn);
-        turns.push(turn);
+      case EventType.ToolRequested:
+        // Tool calls are shown in the Event Stream pane, not in the chat. Just end
+        // the current assistant bubble so text after the tool starts a new one.
         assistant = null;
         break;
-      }
-      case EventType.ToolCompleted: {
-        const turn = toolsById.get(ev.toolCallId);
-        if (turn) {
-          turn.part = {
-            ...turn.part,
-            state: "output-available",
-            output: ev.result as Record<string, unknown>,
-          };
-        }
-        break;
-      }
-      case EventType.ToolFailed: {
-        const turn = toolsById.get(ev.toolCallId);
-        if (turn) turn.part = { ...turn.part, state: "output-error", errorText: ev.error };
-        break;
-      }
       case EventType.AgentHandoff:
         assistant = null;
         turns.push({ id: ev.id, role: "handoff", from: ev.from, to: ev.to, reason: ev.reason });
@@ -466,8 +436,6 @@ function TurnView({ turn }: { turn: Turn }) {
       );
     case "assistant":
       return <Markdown className={PROSE}>{turn.text}</Markdown>;
-    case "tool":
-      return <Tool toolPart={turn.part} />;
     case "supervision":
       return (
         <div className="space-y-2">
